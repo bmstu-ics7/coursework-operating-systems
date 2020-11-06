@@ -3,6 +3,7 @@
 *.o
 .*.cmd
 .*.flags
+*.mod
 *.mod.c
 *.order
 .*.*.cmd
@@ -10,3 +11,4 @@
 .tmp*
 .tmp_versions
 *.ko
+*.symvers
