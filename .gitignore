@@ -1,0 +1,12 @@
+## Module build files
+
+*.o
+.*.cmd
+.*.flags
+*.mod.c
+*.order
+.*.*.cmd
+*~ *.*~ TODO.*
+.tmp*
+.tmp_versions
+*.ko
