@@ -44,7 +44,7 @@ static int __init keyboard_tablet_init(void)
 
     if (result < 0)
     {
-        printk(KERN_ERR "[%s] usb register error", DRIVER_NAME);
+        printk(KERN_ERR "[%s] usb register error\n", DRIVER_NAME);
         return result;
     }
 
