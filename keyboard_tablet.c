@@ -15,13 +15,30 @@ MODULE_LICENSE(DRIVER_LICENSE);
 #define ID_VENDOR_TABLET  0x056a /* Wacom Co. */
 #define ID_PRODUCT_TABLET 0x0301 /* Ltd CTL-671 */
 
-static int tablet_probe(struct usb_interface *interface, const struct usb_device_id *id)
-{
+struct tablet_features {
+    int pkg_len;
+};
+
+struct tablet {
+    unsigned char          *data;
+    struct tablet_features *features;
+};
+
+static int tablet_probe(struct usb_interface *interface, const struct usb_device_id *id) {
     return 0;
 }
 
-static void tablet_disconnect(struct usb_interface *interface)
-{
+static void tablet_disconnect(struct usb_interface *interface) {
+    struct tablet *tablet = usb_get_intfdata(inteface);
+    usb_set_intfdata(inteface, NULL);
+
+    if (tablet) {
+        usb_kill_urb(tablet->irq);
+        input_unregister_device(tablet->dev);
+        usb_free_urb(tablet->irq);
+        usb_free_coherent(interface_to_usbdev(interface), tablet->features->pkg_len, tablet->data, tablet->data_dma);
+        kfree(tablet);
+    }
 }
 
 static struct usb_device_id tablet_table [] = {
@@ -38,12 +55,10 @@ static struct usb_driver tablet_driver = {
     .id_table   = tablet_table,
 };
 
-static int __init keyboard_tablet_init(void)
-{
+static int __init keyboard_tablet_init(void) {
     int result = usb_register(&tablet_driver);
 
-    if (result < 0)
-    {
+    if (result < 0) {
         printk(KERN_ERR "[%s] usb register error\n", DRIVER_NAME);
         return result;
     }
@@ -52,8 +67,7 @@ static int __init keyboard_tablet_init(void)
     return 0;
 }
 
-static void __exit keyboard_tablet_exit(void)
-{
+static void __exit keyboard_tablet_exit(void) {
     usb_deregister(&tablet_driver);
     printk(KERN_INFO "[%s] module unloaded\n", DRIVER_NAME);
 }
