@@ -1,3 +1,5 @@
+MODULES := hid_generic usbhid hid
+
 ifneq ($(KERNELRELEASE),)
 	obj-m := keyboard_tablet.o
 else
@@ -16,5 +18,8 @@ clean:
 
 disclean: clean
 	@rm *.ko *.symvers
+
+remove_modules:
+	sudo rmmod $(MODULES)
 
 endif
