@@ -1,4 +1,4 @@
-MODULES := hid_generic usbhid hid
+MODULES := keyboard_tablet wacom hid_generic usbhid hid
 
 ifneq ($(KERNELRELEASE),)
 	obj-m := keyboard_tablet.o
