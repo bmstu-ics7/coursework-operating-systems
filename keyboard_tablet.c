@@ -35,6 +35,18 @@ struct tablet {
 
 typedef struct tablet tablet_t;
 
+static void tablet_irq(struct urb *urb) {
+    int retval;
+
+    printk(KERN_INFO "[%s] irq catched", DRIVER_NAME);
+
+    // input_sync(hanvon->dev);
+
+    retval = usb_submit_urb (urb, GFP_ATOMIC);
+    if (retval)
+        printk(KERN_ERR "[%s] %s - usb_submit_urb failed with result %d", DRIVER_NAME, __func__, retval);
+}
+
 static int tablet_open(struct input_dev *dev) {
     tablet_t *tablet = input_get_drvdata(dev);
 
@@ -55,6 +67,7 @@ static int tablet_probe(struct usb_interface *interface, const struct usb_device
     struct usb_device *usb_device = interface_to_usbdev(interface);
     tablet_t *tablet;
     struct input_dev *input_dev;
+    struct usb_endpoint_descriptor *endpoint;
     int error = -ENOMEM;
 
     printk(KERN_INFO "[%s] probe checking tablet\n", DRIVER_NAME);
@@ -64,6 +77,8 @@ static int tablet_probe(struct usb_interface *interface, const struct usb_device
     if (!tablet || !input_dev) {
         input_free_device(input_dev);
         kfree(tablet);
+
+        printk(KERN_ERR "[%s] error when allocate device\n", DRIVER_NAME);
         return error;
     }
 
@@ -71,6 +86,8 @@ static int tablet_probe(struct usb_interface *interface, const struct usb_device
     if (!tablet->data) {
         input_free_device(input_dev);
         kfree(tablet);
+
+        printk(KERN_ERR "[%s] error when allocate coherent\n", DRIVER_NAME);
         return error;
     }
 
@@ -79,6 +96,8 @@ static int tablet_probe(struct usb_interface *interface, const struct usb_device
         usb_free_coherent(usb_device, USB_PACKET_LEN, tablet->data, tablet->data_dma);
         input_free_device(input_dev);
         kfree(tablet);
+
+        printk(KERN_ERR "[%s] error when allocate urb\n", DRIVER_NAME);
         return error;
     }
 
@@ -98,7 +117,19 @@ static int tablet_probe(struct usb_interface *interface, const struct usb_device
     input_dev->open = tablet_open;
     input_dev->close = tablet_close;
 
-    // code here
+    endpoint = &interface->cur_altsetting->endpoint[0].desc;
+
+    usb_fill_int_urb(
+        tablet->irq, usb_device,
+        usb_rcvintpipe(usb_device, endpoint->bEndpointAddress),
+        tablet->data, USB_PACKET_LEN,
+        tablet_irq, tablet, endpoint->bInterval
+    );
+
+    usb_submit_urb(tablet->irq, GFP_ATOMIC);
+
+    tablet->irq->transfer_dma = tablet->data_dma;
+    tablet->irq->transfer_flags |= URB_NO_TRANSFER_DMA_MAP;
 
     error = input_register_device(tablet->input_dev);
     if (error) {
@@ -106,10 +137,15 @@ static int tablet_probe(struct usb_interface *interface, const struct usb_device
         usb_free_coherent(usb_device, USB_PACKET_LEN, tablet->data, tablet->data_dma);
         input_free_device(input_dev);
         kfree(tablet);
+
+        printk(KERN_ERR "[%s] error when register device\n", DRIVER_NAME);
         return error;
     }
 
     usb_set_intfdata(interface, tablet);
+
+    printk(KERN_INFO "[%s] device is conected\n", DRIVER_NAME);
+
     return 0;
 }
 
@@ -123,6 +159,8 @@ static void tablet_disconnect(struct usb_interface *interface) {
         usb_free_urb(tablet->irq);
         usb_free_coherent(interface_to_usbdev(interface), USB_PACKET_LEN, tablet->data, tablet->data_dma);
         kfree(tablet);
+
+        printk(KERN_INFO "[%s] device was disconected\n", DRIVER_NAME);
     }
 }
 
