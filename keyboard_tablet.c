@@ -19,6 +19,14 @@ MODULE_LICENSE(DRIVER_LICENSE);
 #define USB_PACKET_LEN  10
 #define WHEEL_THRESHOLD 4
 
+#define MAX_X 1920
+#define MAX_Y 1080
+
+#define MAX_VALUE 0x7F
+
+#define X_FACTOR (MAX_X / MAX_VALUE + 1)
+#define Y_FACTOR (MAX_Y / MAX_VALUE + 1)
+
 struct tablet_features {
     int pkg_len;
 };
@@ -39,6 +47,7 @@ static bool pen_enter;
 
 static void tablet_irq(struct urb *urb) {
     int retval;
+    u16 x, y;
     tablet_t *tablet = urb->context;
     unsigned char *data = tablet->data;
 
@@ -50,7 +59,10 @@ static void tablet_irq(struct urb *urb) {
     switch(data[1]) {
         case 0xf1:
             if (!pen_enter) {
-                printk(KERN_INFO "%s: pen enters\n", DRIVER_NAME);
+                x = data[3] * X_FACTOR;
+                y = data[5] * Y_FACTOR;
+
+                printk(KERN_INFO "%s: pen enters %d %d\n", DRIVER_NAME, x, y);
                 pen_enter = true;
             }
             break;
