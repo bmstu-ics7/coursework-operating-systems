@@ -1,6 +1,3 @@
-FILE_NAME := ./keyboard_tablet.ko
-MODULES := keyboard_tablet wacom hid_generic usbhid hid
-
 ifneq ($(KERNELRELEASE),)
 	obj-m := keyboard_tablet.o
 else
@@ -19,14 +16,5 @@ clean:
 
 disclean: clean
 	@rm *.ko *.symvers
-
-remove_modules:
-	sudo rmmod $(MODULES)
-
-insert_module:
-	sudo insmod $(FILE_NAME)
-
-reload_module: all
-	make remove_modules || make insert_module
 
 endif
