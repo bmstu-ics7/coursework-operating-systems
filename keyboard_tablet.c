@@ -51,16 +51,36 @@ static bool pen_enter;
 
 static struct workqueue_struct *workq;
 
+static struct input_dev *keyboard;
+
+static void call_keyboard(void) {
+    input_report_key(keyboard, KEY_Z, 1);
+    input_sync(keyboard);
+
+    input_report_key(keyboard, KEY_Z, 0);
+    input_sync(keyboard);
+}
+
 static void work_irq(struct work_struct *work) {
     container_urb_t *container = container_of(work, container_urb_t, work);
-    struct urb *urb = container->urb;
+    struct urb *urb;
     int retval;
     u16 x, y;
-    tablet_t *tablet = urb->context;
-    unsigned char *data = tablet->data;
+    tablet_t *tablet;
+    unsigned char *data;
+
+    if (container == NULL) {
+        printk(KERN_ERR "%s: %s - container is NULL\n", DRIVER_NAME, __func__);
+        return;
+    }
+
+    urb = container->urb;
+    tablet = urb->context;
+    data = tablet->data;
 
     if (urb->status != 0) {
         printk(KERN_ERR "%s: %s - urb status is %d\n", DRIVER_NAME, __func__, urb->status);
+        kfree(container);
         return;
     }
 
@@ -69,6 +89,8 @@ static void work_irq(struct work_struct *work) {
             if (!pen_enter) {
                 x = data[3] * X_FACTOR;
                 y = data[5] * Y_FACTOR;
+
+                call_keyboard();
 
                 printk(KERN_INFO "%s: pen enters %d %d\n", DRIVER_NAME, x, y);
                 pen_enter = true;
@@ -87,6 +109,8 @@ static void work_irq(struct work_struct *work) {
     retval = usb_submit_urb (urb, GFP_ATOMIC);
     if (retval)
         printk(KERN_ERR "%s: %s - usb_submit_urb failed with result %d\n", DRIVER_NAME, __func__, retval);
+
+    kfree(container);
 }
 
 static void tablet_irq(struct urb *urb) {
@@ -238,8 +262,25 @@ static int __init keyboard_tablet_init(void) {
 
     workq = create_workqueue("workqueue");
     if (workq == NULL) {
-        printk(KERN_ERR "%s: error while create workqueue\n", DRIVER_NAME);
+        printk(KERN_ERR "%s: allocation workqueue error\n", DRIVER_NAME);
         return -1;
+    }
+
+    keyboard = input_allocate_device();
+    if (keyboard == NULL) {
+        printk(KERN_ERR "%s: allocation device error\n", DRIVER_NAME);
+        return -1;
+    }
+
+    keyboard->name = "virtual keyboard";
+
+    set_bit(EV_KEY, keyboard->evbit);
+    set_bit(KEY_Z, keyboard->keybit);
+
+    result = input_register_device(keyboard);
+    if (result != 0) {
+        printk(KERN_ERR "%s: registration device error\n", DRIVER_NAME);
+        return result;
     }
 
     printk(KERN_INFO "%s: module loaded\n", DRIVER_NAME);
@@ -247,6 +288,9 @@ static int __init keyboard_tablet_init(void) {
 }
 
 static void __exit keyboard_tablet_exit(void) {
+    flush_workqueue(workq);
+    destroy_workqueue(workq);
+    input_unregister_device(keyboard);
     usb_deregister(&tablet_driver);
     printk(KERN_INFO "%s: module unloaded\n", DRIVER_NAME);
 }
