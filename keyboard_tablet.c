@@ -35,16 +35,38 @@ struct tablet {
 
 typedef struct tablet tablet_t;
 
+static bool pen_enter;
+
 static void tablet_irq(struct urb *urb) {
     int retval;
+    tablet_t *tablet = urb->context;
+    unsigned char *data = tablet->data;
 
-    printk(KERN_INFO "[%s] irq catched", DRIVER_NAME);
+    if (urb->status != 0) {
+        printk(KERN_ERR "%s: %s - urb status is %d\n", DRIVER_NAME, __func__, urb->status);
+        return;
+    }
 
-    // input_sync(hanvon->dev);
+    switch(data[1]) {
+        case 0xf1:
+            if (!pen_enter) {
+                printk(KERN_INFO "%s: pen enters\n", DRIVER_NAME);
+                pen_enter = true;
+            }
+            break;
+        case 0xf0:
+            if (pen_enter) {
+                printk(KERN_INFO "%s: pen leaves\n", DRIVER_NAME);
+                pen_enter = false;
+            }
+            break;
+        default:
+            break;
+    }
 
     retval = usb_submit_urb (urb, GFP_ATOMIC);
     if (retval)
-        printk(KERN_ERR "[%s] %s - usb_submit_urb failed with result %d", DRIVER_NAME, __func__, retval);
+        printk(KERN_ERR "%s: %s - usb_submit_urb failed with result %d\n", DRIVER_NAME, __func__, retval);
 }
 
 static int tablet_open(struct input_dev *dev) {
@@ -70,7 +92,7 @@ static int tablet_probe(struct usb_interface *interface, const struct usb_device
     struct usb_endpoint_descriptor *endpoint;
     int error = -ENOMEM;
 
-    printk(KERN_INFO "[%s] probe checking tablet\n", DRIVER_NAME);
+    printk(KERN_INFO "%s: probe checking tablet\n", DRIVER_NAME);
 
     tablet = kzalloc(sizeof(tablet_t), GFP_KERNEL);
     input_dev = input_allocate_device();
@@ -78,7 +100,7 @@ static int tablet_probe(struct usb_interface *interface, const struct usb_device
         input_free_device(input_dev);
         kfree(tablet);
 
-        printk(KERN_ERR "[%s] error when allocate device\n", DRIVER_NAME);
+        printk(KERN_ERR "%s: error when allocate device\n", DRIVER_NAME);
         return error;
     }
 
@@ -87,7 +109,7 @@ static int tablet_probe(struct usb_interface *interface, const struct usb_device
         input_free_device(input_dev);
         kfree(tablet);
 
-        printk(KERN_ERR "[%s] error when allocate coherent\n", DRIVER_NAME);
+        printk(KERN_ERR "%s: error when allocate coherent\n", DRIVER_NAME);
         return error;
     }
 
@@ -97,7 +119,7 @@ static int tablet_probe(struct usb_interface *interface, const struct usb_device
         input_free_device(input_dev);
         kfree(tablet);
 
-        printk(KERN_ERR "[%s] error when allocate urb\n", DRIVER_NAME);
+        printk(KERN_ERR "%s: error when allocate urb\n", DRIVER_NAME);
         return error;
     }
 
@@ -138,13 +160,14 @@ static int tablet_probe(struct usb_interface *interface, const struct usb_device
         input_free_device(input_dev);
         kfree(tablet);
 
-        printk(KERN_ERR "[%s] error when register device\n", DRIVER_NAME);
+        printk(KERN_ERR "%s: error when register device\n", DRIVER_NAME);
         return error;
     }
 
     usb_set_intfdata(interface, tablet);
 
-    printk(KERN_INFO "[%s] device is conected\n", DRIVER_NAME);
+    pen_enter = false;
+    printk(KERN_INFO "%s: device is conected\n", DRIVER_NAME);
 
     return 0;
 }
@@ -160,7 +183,7 @@ static void tablet_disconnect(struct usb_interface *interface) {
         usb_free_coherent(interface_to_usbdev(interface), USB_PACKET_LEN, tablet->data, tablet->data_dma);
         kfree(tablet);
 
-        printk(KERN_INFO "[%s] device was disconected\n", DRIVER_NAME);
+        printk(KERN_INFO "%s: device was disconected\n", DRIVER_NAME);
     }
 }
 
@@ -182,17 +205,17 @@ static int __init keyboard_tablet_init(void) {
     int result = usb_register(&tablet_driver);
 
     if (result < 0) {
-        printk(KERN_ERR "[%s] usb register error\n", DRIVER_NAME);
+        printk(KERN_ERR "%s: usb register error\n", DRIVER_NAME);
         return result;
     }
 
-    printk(KERN_INFO "[%s] module loaded\n", DRIVER_NAME);
+    printk(KERN_INFO "%s: module loaded\n", DRIVER_NAME);
     return 0;
 }
 
 static void __exit keyboard_tablet_exit(void) {
     usb_deregister(&tablet_driver);
-    printk(KERN_INFO "[%s] module unloaded\n", DRIVER_NAME);
+    printk(KERN_INFO "%s: module unloaded\n", DRIVER_NAME);
 }
 
 module_init(keyboard_tablet_init);
