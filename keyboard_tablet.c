@@ -3,6 +3,7 @@
 #include <linux/kernel.h>
 #include <linux/usb/input.h>
 #include <linux/slab.h>
+#include <linux/workqueue.h>
 
 #define DRIVER_NAME    "keyboard_tablet"
 #define DRIVER_AUTHOR  "Alexander Stepanov"
@@ -27,10 +28,6 @@ MODULE_LICENSE(DRIVER_LICENSE);
 #define X_FACTOR (MAX_X / MAX_VALUE + 1)
 #define Y_FACTOR (MAX_Y / MAX_VALUE + 1)
 
-struct tablet_features {
-    int pkg_len;
-};
-
 struct tablet {
     unsigned char     *data;
     dma_addr_t         data_dma;
@@ -43,9 +40,20 @@ struct tablet {
 
 typedef struct tablet tablet_t;
 
+struct container_urb {
+    struct urb *urb;
+    struct work_struct work;
+};
+
+typedef struct container_urb container_urb_t;
+
 static bool pen_enter;
 
-static void tablet_irq(struct urb *urb) {
+static struct workqueue_struct *workq;
+
+static void work_irq(struct work_struct *work) {
+    container_urb_t *container = container_of(work, container_urb_t, work);
+    struct urb *urb = container->urb;
     int retval;
     u16 x, y;
     tablet_t *tablet = urb->context;
@@ -79,6 +87,13 @@ static void tablet_irq(struct urb *urb) {
     retval = usb_submit_urb (urb, GFP_ATOMIC);
     if (retval)
         printk(KERN_ERR "%s: %s - usb_submit_urb failed with result %d\n", DRIVER_NAME, __func__, retval);
+}
+
+static void tablet_irq(struct urb *urb) {
+    container_urb_t *container = kzalloc(sizeof(container_urb_t), GFP_KERNEL);
+    container->urb = urb;
+    INIT_WORK(&container->work, work_irq);
+    queue_work(workq, &container->work);
 }
 
 static int tablet_open(struct input_dev *dev) {
@@ -219,6 +234,12 @@ static int __init keyboard_tablet_init(void) {
     if (result < 0) {
         printk(KERN_ERR "%s: usb register error\n", DRIVER_NAME);
         return result;
+    }
+
+    workq = create_workqueue("workqueue");
+    if (workq == NULL) {
+        printk(KERN_ERR "%s: error while create workqueue\n", DRIVER_NAME);
+        return -1;
     }
 
     printk(KERN_INFO "%s: module loaded\n", DRIVER_NAME);
