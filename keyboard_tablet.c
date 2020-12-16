@@ -53,10 +53,12 @@ static struct workqueue_struct *workq;
 
 static struct input_dev *keyboard;
 
-static void call_keyboard(void) {
+static void down_keyboard(void) {
     input_report_key(keyboard, KEY_Z, 1);
     input_sync(keyboard);
+}
 
+static void up_keyboard(void) {
     input_report_key(keyboard, KEY_Z, 0);
     input_sync(keyboard);
 }
@@ -90,7 +92,7 @@ static void work_irq(struct work_struct *work) {
                 x = data[3] * X_FACTOR;
                 y = data[5] * Y_FACTOR;
 
-                call_keyboard();
+                down_keyboard();
 
                 printk(KERN_INFO "%s: pen enters %d %d\n", DRIVER_NAME, x, y);
                 pen_enter = true;
@@ -98,6 +100,8 @@ static void work_irq(struct work_struct *work) {
             break;
         case 0xf0:
             if (pen_enter) {
+                up_keyboard();
+
                 printk(KERN_INFO "%s: pen leaves\n", DRIVER_NAME);
                 pen_enter = false;
             }
