@@ -184,22 +184,45 @@ static void press_key(u16 x, u16 y) {
             printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "enter");
             pressed_key = KEY_ENTER;
         }
-    } else {              /* fourth row */
-        if (x <= 5) {
-        } else if (x <= 11) {
+    } else if (y <= 39) {              /* fourth row */
+        if (x <= 11) {
+            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "left shift");
+            pressed_key = KEY_LEFTSHIFT;
         } else if (x <= 17) {
+            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "z");
+            pressed_key = KEY_Z;
         } else if (x <= 23) {
+            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "x");
+            pressed_key = KEY_X;
         } else if (x <= 29) {
+            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "c");
+            pressed_key = KEY_C;
         } else if (x <= 35) {
+            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "v");
+            pressed_key = KEY_V;
         } else if (x <= 41) {
+            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "b");
+            pressed_key = KEY_B;
         } else if (x <= 47) {
+            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "n");
+            pressed_key = KEY_N;
         } else if (x <= 53) {
+            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "m");
+            pressed_key = KEY_M;
         } else if (x <= 59) {
+            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, ",");
+            pressed_key = KEY_COMMA;
         } else if (x <= 65) {
+            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, ".");
+            pressed_key = KEY_DOT;
         } else if (x <= 71) {
-        } else if (x <= 77) {
+            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "/");
+            pressed_key = KEY_SLASH;
         } else if (x <= 83) {
+            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "right shift");
+            pressed_key = KEY_RIGHTSHIFT;
         }
+    } else {
     }
 }
 
@@ -472,8 +495,18 @@ static int __init keyboard_tablet_init(void) {
     set_bit(KEY_SEMICOLON, keyboard->keybit);
     set_bit(KEY_APOSTROPHE, keyboard->keybit);
     set_bit(KEY_ENTER, keyboard->keybit);
-
+    set_bit(KEY_LEFTSHIFT, keyboard->keybit);
     set_bit(KEY_Z, keyboard->keybit);
+    set_bit(KEY_X, keyboard->keybit);
+    set_bit(KEY_C, keyboard->keybit);
+    set_bit(KEY_V, keyboard->keybit);
+    set_bit(KEY_B, keyboard->keybit);
+    set_bit(KEY_N, keyboard->keybit);
+    set_bit(KEY_M, keyboard->keybit);
+    set_bit(KEY_COMMA, keyboard->keybit);
+    set_bit(KEY_DOT, keyboard->keybit);
+    set_bit(KEY_SLASH, keyboard->keybit);
+    set_bit(KEY_RIGHTSHIFT, keyboard->keybit);
 
     result = input_register_device(keyboard);
     if (result != 0) {
@@ -487,9 +520,7 @@ static int __init keyboard_tablet_init(void) {
 
 static void __exit keyboard_tablet_exit(void) {
     flush_workqueue(workq);
-    destroy_workqueue(workq);
-    input_unregister_device(keyboard);
-    usb_deregister(&tablet_driver);
+    destroy_workqueue(workq); input_unregister_device(keyboard); usb_deregister(&tablet_driver);
     printk(KERN_INFO "%s: module unloaded\n", DRIVER_NAME);
 }
 
