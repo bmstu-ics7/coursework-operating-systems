@@ -48,18 +48,24 @@ struct container_urb {
 typedef struct container_urb container_urb_t;
 
 static bool pen_enter;
+static int pressed_key;
 
 static struct workqueue_struct *workq;
 
 static struct input_dev *keyboard;
 
-static void down_keyboard(void) {
-    input_report_key(keyboard, KEY_Z, 1);
+static void press_key(u16 x, u16 y) {
+    pressed_key = KEY_Z;
+}
+
+static void down_keyboard(u16 x, u16 y) {
+    press_key(x, y);
+    input_report_key(keyboard, pressed_key, 1);
     input_sync(keyboard);
 }
 
 static void up_keyboard(void) {
-    input_report_key(keyboard, KEY_Z, 0);
+    input_report_key(keyboard, pressed_key, 0);
     input_sync(keyboard);
 }
 
@@ -92,7 +98,7 @@ static void work_irq(struct work_struct *work) {
                 x = data[3] * X_FACTOR;
                 y = data[5] * Y_FACTOR;
 
-                down_keyboard();
+                down_keyboard(x / 16, y / 9);
 
                 printk(KERN_INFO "%s: pen enters %d %d\n", DRIVER_NAME, x, y);
                 pen_enter = true;
