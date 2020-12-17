@@ -270,7 +270,6 @@ static void press_key(u16 x, u16 y) {
 }
 
 static void down_keyboard(u16 x, u16 y) {
-    printk(KERN_WARNING "%d", pressed_key);
     press_key(x, y);
     input_report_key(keyboard, pressed_key, 1);
     input_sync(keyboard);
