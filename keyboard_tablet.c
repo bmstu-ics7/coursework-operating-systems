@@ -223,6 +223,49 @@ static void press_key(u16 x, u16 y) {
             pressed_key = KEY_RIGHTSHIFT;
         }
     } else {
+        if (x <= 5) {
+            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "left control");
+            pressed_key = KEY_LEFTCTRL;
+        } else if (x <= 11) {
+            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "meta");
+            pressed_key = KEY_LEFTMETA;
+        } else if (x <= 17) {
+            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "left alt");
+            pressed_key = KEY_LEFTALT;
+        } else if (x <= 59) {
+            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "space");
+            pressed_key = KEY_SPACE;
+        } else if (x <= 65) {
+            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "right alt");
+            pressed_key = KEY_RIGHTALT;
+        } else if (x <= 77) {
+            if (y <= 45) {
+                if (x <= 69) {
+                    printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "delete");
+                    pressed_key = KEY_DELETE;
+                } else if (x <= 73) {
+                    printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "up");
+                    pressed_key = KEY_UP;
+                } else {
+                    printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "grave");
+                    pressed_key = KEY_GRAVE;
+                }
+            } else {
+                if (x <= 69) {
+                    printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "left");
+                    pressed_key = KEY_LEFT;
+                } else if (x <= 73) {
+                    printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "down");
+                    pressed_key = KEY_DOWN;
+                } else {
+                    printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "right");
+                    pressed_key = KEY_RIGHT;
+                }
+            }
+        } else if (x <= 83) {
+            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "right control");
+            pressed_key = KEY_RIGHTCTRL;
+        }
     }
 }
 
@@ -507,6 +550,18 @@ static int __init keyboard_tablet_init(void) {
     set_bit(KEY_DOT, keyboard->keybit);
     set_bit(KEY_SLASH, keyboard->keybit);
     set_bit(KEY_RIGHTSHIFT, keyboard->keybit);
+    set_bit(KEY_LEFTCTRL, keyboard->keybit);
+    set_bit(KEY_LEFTMETA, keyboard->keybit);
+    set_bit(KEY_LEFTALT, keyboard->keybit);
+    set_bit(KEY_SPACE, keyboard->keybit);
+    set_bit(KEY_RIGHTALT, keyboard->keybit);
+    set_bit(KEY_DELETE, keyboard->keybit);
+    set_bit(KEY_UP, keyboard->keybit);
+    set_bit(KEY_GRAVE, keyboard->keybit);
+    set_bit(KEY_LEFT, keyboard->keybit);
+    set_bit(KEY_DOWN, keyboard->keybit);
+    set_bit(KEY_RIGHT, keyboard->keybit);
+    set_bit(KEY_RIGHTCTRL, keyboard->keybit);
 
     result = input_register_device(keyboard);
     if (result != 0) {
