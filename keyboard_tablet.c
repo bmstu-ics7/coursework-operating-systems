@@ -101,19 +101,47 @@ static void press_key(u16 x, u16 y) {
         }
     } else if (y <= 19) { /* second row */
         if (x <= 5) {
+            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "tab");
+            pressed_key = KEY_TAB;
         } else if (x <= 11) {
+            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "q");
+            pressed_key = KEY_Q;
         } else if (x <= 17) {
+            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "w");
+            pressed_key = KEY_W;
         } else if (x <= 23) {
+            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "e");
+            pressed_key = KEY_E;
         } else if (x <= 29) {
+            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "r");
+            pressed_key = KEY_R;
         } else if (x <= 35) {
+            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "t");
+            pressed_key = KEY_T;
         } else if (x <= 41) {
+            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "y");
+            pressed_key = KEY_Y;
         } else if (x <= 47) {
+            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "u");
+            pressed_key = KEY_U;
         } else if (x <= 53) {
+            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "i");
+            pressed_key = KEY_I;
         } else if (x <= 59) {
+            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "o");
+            pressed_key = KEY_O;
         } else if (x <= 65) {
+            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "p");
+            pressed_key = KEY_P;
         } else if (x <= 71) {
+            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "[");
+            pressed_key = KEY_LEFTBRACE;
         } else if (x <= 77) {
+            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "]");
+            pressed_key = KEY_RIGHTBRACE;
         } else if (x <= 83) {
+            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "\\");
+            pressed_key = KEY_BACKSLASH;
         }
     } else if (y <= 29) { /* third row */
         if (x <= 5) {
@@ -378,7 +406,6 @@ static int __init keyboard_tablet_init(void) {
     keyboard->name = "virtual keyboard";
 
     set_bit(EV_KEY, keyboard->evbit);
-    set_bit(KEY_Z, keyboard->keybit);
     set_bit(KEY_ESC, keyboard->keybit);
     set_bit(KEY_1, keyboard->keybit);
     set_bit(KEY_2, keyboard->keybit);
@@ -393,6 +420,22 @@ static int __init keyboard_tablet_init(void) {
     set_bit(KEY_MINUS, keyboard->keybit);
     set_bit(KEY_EQUAL, keyboard->keybit);
     set_bit(KEY_BACKSPACE, keyboard->keybit);
+    set_bit(KEY_TAB, keyboard->keybit);
+    set_bit(KEY_Q, keyboard->keybit);
+    set_bit(KEY_W, keyboard->keybit);
+    set_bit(KEY_E, keyboard->keybit);
+    set_bit(KEY_R, keyboard->keybit);
+    set_bit(KEY_T, keyboard->keybit);
+    set_bit(KEY_Y, keyboard->keybit);
+    set_bit(KEY_U, keyboard->keybit);
+    set_bit(KEY_I, keyboard->keybit);
+    set_bit(KEY_O, keyboard->keybit);
+    set_bit(KEY_P, keyboard->keybit);
+    set_bit(KEY_LEFTBRACE, keyboard->keybit);
+    set_bit(KEY_RIGHTBRACE, keyboard->keybit);
+    set_bit(KEY_BACKSLASH, keyboard->keybit);
+
+    set_bit(KEY_Z, keyboard->keybit);
 
     result = input_register_device(keyboard);
     if (result != 0) {
