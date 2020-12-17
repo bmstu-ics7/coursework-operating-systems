@@ -145,19 +145,44 @@ static void press_key(u16 x, u16 y) {
         }
     } else if (y <= 29) { /* third row */
         if (x <= 5) {
+            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "caps");
+            pressed_key = KEY_CAPSLOCK;
         } else if (x <= 11) {
+            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "a");
+            pressed_key = KEY_A;
         } else if (x <= 17) {
+            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "s");
+            pressed_key = KEY_S;
         } else if (x <= 23) {
+            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "d");
+            pressed_key = KEY_D;
         } else if (x <= 29) {
+            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "f");
+            pressed_key = KEY_F;
         } else if (x <= 35) {
+            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "g");
+            pressed_key = KEY_G;
         } else if (x <= 41) {
+            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "h");
+            pressed_key = KEY_H;
         } else if (x <= 47) {
+            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "j");
+            pressed_key = KEY_J;
         } else if (x <= 53) {
+            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "k");
+            pressed_key = KEY_K;
         } else if (x <= 59) {
+            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "l");
+            pressed_key = KEY_L;
         } else if (x <= 65) {
+            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, ";");
+            pressed_key = KEY_SEMICOLON;
         } else if (x <= 71) {
-        } else if (x <= 77) {
+            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "'");
+            pressed_key = KEY_APOSTROPHE;
         } else if (x <= 83) {
+            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "enter");
+            pressed_key = KEY_ENTER;
         }
     } else {              /* fourth row */
         if (x <= 5) {
@@ -434,6 +459,19 @@ static int __init keyboard_tablet_init(void) {
     set_bit(KEY_LEFTBRACE, keyboard->keybit);
     set_bit(KEY_RIGHTBRACE, keyboard->keybit);
     set_bit(KEY_BACKSLASH, keyboard->keybit);
+    set_bit(KEY_CAPSLOCK, keyboard->keybit);
+    set_bit(KEY_A, keyboard->keybit);
+    set_bit(KEY_S, keyboard->keybit);
+    set_bit(KEY_D, keyboard->keybit);
+    set_bit(KEY_F, keyboard->keybit);
+    set_bit(KEY_G, keyboard->keybit);
+    set_bit(KEY_H, keyboard->keybit);
+    set_bit(KEY_J, keyboard->keybit);
+    set_bit(KEY_K, keyboard->keybit);
+    set_bit(KEY_L, keyboard->keybit);
+    set_bit(KEY_SEMICOLON, keyboard->keybit);
+    set_bit(KEY_APOSTROPHE, keyboard->keybit);
+    set_bit(KEY_ENTER, keyboard->keybit);
 
     set_bit(KEY_Z, keyboard->keybit);
 
