@@ -55,10 +55,103 @@ static struct workqueue_struct *workq;
 static struct input_dev *keyboard;
 
 static void press_key(u16 x, u16 y) {
-    pressed_key = KEY_Z;
+    if (y <= 9) {         /* first row */
+        if (x <= 5) {
+            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "esc");
+            pressed_key = KEY_ESC;
+        } else if (x <= 11) {
+            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "1");
+            pressed_key = KEY_1;
+        } else if (x <= 17) {
+            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "2");
+            pressed_key = KEY_2;
+        } else if (x <= 23) {
+            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "3");
+            pressed_key = KEY_3;
+        } else if (x <= 29) {
+            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "4");
+            pressed_key = KEY_4;
+        } else if (x <= 35) {
+            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "5");
+            pressed_key = KEY_5;
+        } else if (x <= 41) {
+            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "6");
+            pressed_key = KEY_6;
+        } else if (x <= 47) {
+            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "7");
+            pressed_key = KEY_7;
+        } else if (x <= 53) {
+            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "8");
+            pressed_key = KEY_8;
+        } else if (x <= 59) {
+            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "9");
+            pressed_key = KEY_9;
+        } else if (x <= 65) {
+            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "0");
+            pressed_key = KEY_0;
+        } else if (x <= 71) {
+            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "-");
+            pressed_key = KEY_MINUS;
+        } else if (x <= 77) {
+            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "=");
+            pressed_key = KEY_EQUAL;
+        } else if (x <= 83) {
+            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "backspace");
+            pressed_key = KEY_BACKSPACE;
+        }
+    } else if (y <= 19) { /* second row */
+        if (x <= 5) {
+        } else if (x <= 11) {
+        } else if (x <= 17) {
+        } else if (x <= 23) {
+        } else if (x <= 29) {
+        } else if (x <= 35) {
+        } else if (x <= 41) {
+        } else if (x <= 47) {
+        } else if (x <= 53) {
+        } else if (x <= 59) {
+        } else if (x <= 65) {
+        } else if (x <= 71) {
+        } else if (x <= 77) {
+        } else if (x <= 83) {
+        }
+    } else if (y <= 29) { /* third row */
+        if (x <= 5) {
+        } else if (x <= 11) {
+        } else if (x <= 17) {
+        } else if (x <= 23) {
+        } else if (x <= 29) {
+        } else if (x <= 35) {
+        } else if (x <= 41) {
+        } else if (x <= 47) {
+        } else if (x <= 53) {
+        } else if (x <= 59) {
+        } else if (x <= 65) {
+        } else if (x <= 71) {
+        } else if (x <= 77) {
+        } else if (x <= 83) {
+        }
+    } else {              /* fourth row */
+        if (x <= 5) {
+        } else if (x <= 11) {
+        } else if (x <= 17) {
+        } else if (x <= 23) {
+        } else if (x <= 29) {
+        } else if (x <= 35) {
+        } else if (x <= 41) {
+        } else if (x <= 47) {
+        } else if (x <= 53) {
+        } else if (x <= 59) {
+        } else if (x <= 65) {
+        } else if (x <= 71) {
+        } else if (x <= 77) {
+        } else if (x <= 83) {
+        }
+    }
 }
 
 static void down_keyboard(u16 x, u16 y) {
+    printk(KERN_WARNING "%d", pressed_key);
     press_key(x, y);
     input_report_key(keyboard, pressed_key, 1);
     input_sync(keyboard);
@@ -286,6 +379,20 @@ static int __init keyboard_tablet_init(void) {
 
     set_bit(EV_KEY, keyboard->evbit);
     set_bit(KEY_Z, keyboard->keybit);
+    set_bit(KEY_ESC, keyboard->keybit);
+    set_bit(KEY_1, keyboard->keybit);
+    set_bit(KEY_2, keyboard->keybit);
+    set_bit(KEY_3, keyboard->keybit);
+    set_bit(KEY_4, keyboard->keybit);
+    set_bit(KEY_5, keyboard->keybit);
+    set_bit(KEY_6, keyboard->keybit);
+    set_bit(KEY_7, keyboard->keybit);
+    set_bit(KEY_8, keyboard->keybit);
+    set_bit(KEY_9, keyboard->keybit);
+    set_bit(KEY_0, keyboard->keybit);
+    set_bit(KEY_MINUS, keyboard->keybit);
+    set_bit(KEY_EQUAL, keyboard->keybit);
+    set_bit(KEY_BACKSPACE, keyboard->keybit);
 
     result = input_register_device(keyboard);
     if (result != 0) {
