@@ -574,7 +574,9 @@ static int __init keyboard_tablet_init(void) {
 
 static void __exit keyboard_tablet_exit(void) {
     flush_workqueue(workq);
-    destroy_workqueue(workq); input_unregister_device(keyboard); usb_deregister(&tablet_driver);
+    destroy_workqueue(workq);
+    input_unregister_device(keyboard);
+    usb_deregister(&tablet_driver);
     printk(KERN_INFO "%s: module unloaded\n", DRIVER_NAME);
 }
 
