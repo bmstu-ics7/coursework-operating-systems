@@ -270,7 +270,6 @@ static void press_key(u16 x, u16 y) {
 }
 
 static void down_keyboard(u16 x, u16 y) {
-    printk(KERN_WARNING "%d", pressed_key);
     press_key(x, y);
     input_report_key(keyboard, pressed_key, 1);
     input_sync(keyboard);
@@ -575,7 +574,9 @@ static int __init keyboard_tablet_init(void) {
 
 static void __exit keyboard_tablet_exit(void) {
     flush_workqueue(workq);
-    destroy_workqueue(workq); input_unregister_device(keyboard); usb_deregister(&tablet_driver);
+    destroy_workqueue(workq);
+    input_unregister_device(keyboard);
+    usb_deregister(&tablet_driver);
     printk(KERN_INFO "%s: module unloaded\n", DRIVER_NAME);
 }
 
