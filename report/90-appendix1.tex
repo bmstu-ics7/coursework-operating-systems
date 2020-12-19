@@ -58,6 +58,19 @@ static int pressed_key;
 static struct workqueue_struct *workq;
 
 static struct input_dev *keyboard;
+
+static int keys[5][14] = {
+    { KEY_ESC, KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9, KEY_0, KEY_MINUS, KEY_EQUAL, KEY_BACKSPACE },
+    { KEY_TAB, KEY_Q, KEY_W, KEY_E, KEY_R, KEY_T, KEY_Y, KEY_U, KEY_I, KEY_O, KEY_P, KEY_LEFTBRACE, KEY_RIGHTBRACE, KEY_BACKSLASH },
+    { KEY_CAPSLOCK, KEY_A, KEY_S, KEY_D, KEY_F, KEY_G, KEY_H, KEY_J, KEY_K, KEY_L, KEY_SEMICOLON, KEY_APOSTROPHE, KEY_ENTER },
+    { KEY_LEFTSHIFT, KEY_LEFTSHIFT, KEY_Z, KEY_X, KEY_C, KEY_V, KEY_B, KEY_N, KEY_M, KEY_COMMA, KEY_DOT, KEY_SLASH, KEY_RIGHTSHIFT, KEY_RIGHTSHIFT },
+    { KEY_LEFTCTRL, KEY_LEFTMETA, KEY_LEFTALT, KEY_SPACE, KEY_SPACE, KEY_SPACE, KEY_SPACE, KEY_SPACE, KEY_SPACE, KEY_SPACE, KEY_RIGHTALT, 0, 0, KEY_RIGHTCTRL },
+};
+
+static int extra_keys[2][3] = {
+    { KEY_DELETE, KEY_UP, KEY_GRAVE },
+    { KEY_LEFT, KEY_DOWN, KEY_RIGHT },
+};
 \end{lstlisting}
 
 \begin{lstlisting}[language=c,caption=Инициализация модуля,label=lst:init]
@@ -84,9 +97,20 @@ static int __init keyboard_tablet_init(void) {
     keyboard->name = "virtual keyboard";
 
     set_bit(EV_KEY, keyboard->evbit);
-    set_bit(KEY_ESC, keyboard->keybit);
-    ...
-    set_bit(KEY_RIGHTCTRL, keyboard->keybit);
+
+    for (i = 0; i < 5; ++i) {
+        for (j = 0; j < 14; ++j) {
+            if (keys[i][j] != 0) {
+                set_bit(keys[i][j], keyboard->keybit);
+            }
+        }
+    }
+
+    for (i = 0; i < 2; ++i) {
+        for (j = 0; j < 3; ++j) {
+            set_bit(extra_keys[i][j], keyboard->keybit);
+        }
+    }
 
     result = input_register_device(keyboard);
     if (result != 0) {
@@ -334,17 +358,11 @@ static void up_keyboard(void) {
 
 \begin{lstlisting}[language=c,caption=Функция перевода координат в клавишу,label=lst:press_key]
 static void press_key(u16 x, u16 y) {
-    if (y <= 9) {         /* first row */
-        if (x <= 5) {
-            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "esc");
-            pressed_key = KEY_ESC;
-        } else if (x <= 11) {
-        ...
-        }
-    } else if (y <= 19) {
-    ...
-    } else {
-        ...
+    y = y >= 50 ? 49 : y;
+    pressed_key = keys[(y / 10) % 5][x / 6];
+    if (pressed_key == 0) {
+        pressed_key = extra_keys[((y - 40) / 6) % 2][((x - 66) / 4) % 3];
     }
+    printk(KERN_INFO "%s: pressed %x\n", DRIVER_NAME, pressed_key);
 }
 \end{lstlisting}

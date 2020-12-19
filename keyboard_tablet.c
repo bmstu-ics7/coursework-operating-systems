@@ -54,219 +54,26 @@ static struct workqueue_struct *workq;
 
 static struct input_dev *keyboard;
 
+static int keys[5][14] = {
+    { KEY_ESC, KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9, KEY_0, KEY_MINUS, KEY_EQUAL, KEY_BACKSPACE },
+    { KEY_TAB, KEY_Q, KEY_W, KEY_E, KEY_R, KEY_T, KEY_Y, KEY_U, KEY_I, KEY_O, KEY_P, KEY_LEFTBRACE, KEY_RIGHTBRACE, KEY_BACKSLASH },
+    { KEY_CAPSLOCK, KEY_A, KEY_S, KEY_D, KEY_F, KEY_G, KEY_H, KEY_J, KEY_K, KEY_L, KEY_SEMICOLON, KEY_APOSTROPHE, KEY_ENTER },
+    { KEY_LEFTSHIFT, KEY_LEFTSHIFT, KEY_Z, KEY_X, KEY_C, KEY_V, KEY_B, KEY_N, KEY_M, KEY_COMMA, KEY_DOT, KEY_SLASH, KEY_RIGHTSHIFT, KEY_RIGHTSHIFT },
+    { KEY_LEFTCTRL, KEY_LEFTMETA, KEY_LEFTALT, KEY_SPACE, KEY_SPACE, KEY_SPACE, KEY_SPACE, KEY_SPACE, KEY_SPACE, KEY_SPACE, KEY_RIGHTALT, 0, 0, KEY_RIGHTCTRL },
+};
+
+static int extra_keys[2][3] = {
+    { KEY_DELETE, KEY_UP, KEY_GRAVE },
+    { KEY_LEFT, KEY_DOWN, KEY_RIGHT },
+};
+
 static void press_key(u16 x, u16 y) {
-    if (y <= 9) {         /* first row */
-        if (x <= 5) {
-            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "esc");
-            pressed_key = KEY_ESC;
-        } else if (x <= 11) {
-            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "1");
-            pressed_key = KEY_1;
-        } else if (x <= 17) {
-            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "2");
-            pressed_key = KEY_2;
-        } else if (x <= 23) {
-            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "3");
-            pressed_key = KEY_3;
-        } else if (x <= 29) {
-            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "4");
-            pressed_key = KEY_4;
-        } else if (x <= 35) {
-            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "5");
-            pressed_key = KEY_5;
-        } else if (x <= 41) {
-            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "6");
-            pressed_key = KEY_6;
-        } else if (x <= 47) {
-            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "7");
-            pressed_key = KEY_7;
-        } else if (x <= 53) {
-            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "8");
-            pressed_key = KEY_8;
-        } else if (x <= 59) {
-            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "9");
-            pressed_key = KEY_9;
-        } else if (x <= 65) {
-            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "0");
-            pressed_key = KEY_0;
-        } else if (x <= 71) {
-            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "-");
-            pressed_key = KEY_MINUS;
-        } else if (x <= 77) {
-            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "=");
-            pressed_key = KEY_EQUAL;
-        } else if (x <= 83) {
-            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "backspace");
-            pressed_key = KEY_BACKSPACE;
-        }
-    } else if (y <= 19) { /* second row */
-        if (x <= 5) {
-            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "tab");
-            pressed_key = KEY_TAB;
-        } else if (x <= 11) {
-            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "q");
-            pressed_key = KEY_Q;
-        } else if (x <= 17) {
-            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "w");
-            pressed_key = KEY_W;
-        } else if (x <= 23) {
-            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "e");
-            pressed_key = KEY_E;
-        } else if (x <= 29) {
-            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "r");
-            pressed_key = KEY_R;
-        } else if (x <= 35) {
-            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "t");
-            pressed_key = KEY_T;
-        } else if (x <= 41) {
-            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "y");
-            pressed_key = KEY_Y;
-        } else if (x <= 47) {
-            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "u");
-            pressed_key = KEY_U;
-        } else if (x <= 53) {
-            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "i");
-            pressed_key = KEY_I;
-        } else if (x <= 59) {
-            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "o");
-            pressed_key = KEY_O;
-        } else if (x <= 65) {
-            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "p");
-            pressed_key = KEY_P;
-        } else if (x <= 71) {
-            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "[");
-            pressed_key = KEY_LEFTBRACE;
-        } else if (x <= 77) {
-            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "]");
-            pressed_key = KEY_RIGHTBRACE;
-        } else if (x <= 83) {
-            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "\\");
-            pressed_key = KEY_BACKSLASH;
-        }
-    } else if (y <= 29) { /* third row */
-        if (x <= 5) {
-            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "caps");
-            pressed_key = KEY_CAPSLOCK;
-        } else if (x <= 11) {
-            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "a");
-            pressed_key = KEY_A;
-        } else if (x <= 17) {
-            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "s");
-            pressed_key = KEY_S;
-        } else if (x <= 23) {
-            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "d");
-            pressed_key = KEY_D;
-        } else if (x <= 29) {
-            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "f");
-            pressed_key = KEY_F;
-        } else if (x <= 35) {
-            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "g");
-            pressed_key = KEY_G;
-        } else if (x <= 41) {
-            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "h");
-            pressed_key = KEY_H;
-        } else if (x <= 47) {
-            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "j");
-            pressed_key = KEY_J;
-        } else if (x <= 53) {
-            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "k");
-            pressed_key = KEY_K;
-        } else if (x <= 59) {
-            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "l");
-            pressed_key = KEY_L;
-        } else if (x <= 65) {
-            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, ";");
-            pressed_key = KEY_SEMICOLON;
-        } else if (x <= 71) {
-            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "'");
-            pressed_key = KEY_APOSTROPHE;
-        } else if (x <= 83) {
-            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "enter");
-            pressed_key = KEY_ENTER;
-        }
-    } else if (y <= 39) {              /* fourth row */
-        if (x <= 11) {
-            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "left shift");
-            pressed_key = KEY_LEFTSHIFT;
-        } else if (x <= 17) {
-            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "z");
-            pressed_key = KEY_Z;
-        } else if (x <= 23) {
-            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "x");
-            pressed_key = KEY_X;
-        } else if (x <= 29) {
-            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "c");
-            pressed_key = KEY_C;
-        } else if (x <= 35) {
-            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "v");
-            pressed_key = KEY_V;
-        } else if (x <= 41) {
-            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "b");
-            pressed_key = KEY_B;
-        } else if (x <= 47) {
-            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "n");
-            pressed_key = KEY_N;
-        } else if (x <= 53) {
-            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "m");
-            pressed_key = KEY_M;
-        } else if (x <= 59) {
-            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, ",");
-            pressed_key = KEY_COMMA;
-        } else if (x <= 65) {
-            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, ".");
-            pressed_key = KEY_DOT;
-        } else if (x <= 71) {
-            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "/");
-            pressed_key = KEY_SLASH;
-        } else if (x <= 83) {
-            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "right shift");
-            pressed_key = KEY_RIGHTSHIFT;
-        }
-    } else {
-        if (x <= 5) {
-            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "left control");
-            pressed_key = KEY_LEFTCTRL;
-        } else if (x <= 11) {
-            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "meta");
-            pressed_key = KEY_LEFTMETA;
-        } else if (x <= 17) {
-            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "left alt");
-            pressed_key = KEY_LEFTALT;
-        } else if (x <= 59) {
-            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "space");
-            pressed_key = KEY_SPACE;
-        } else if (x <= 65) {
-            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "right alt");
-            pressed_key = KEY_RIGHTALT;
-        } else if (x <= 77) {
-            if (y <= 45) {
-                if (x <= 69) {
-                    printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "delete");
-                    pressed_key = KEY_DELETE;
-                } else if (x <= 73) {
-                    printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "up");
-                    pressed_key = KEY_UP;
-                } else {
-                    printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "grave");
-                    pressed_key = KEY_GRAVE;
-                }
-            } else {
-                if (x <= 69) {
-                    printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "left");
-                    pressed_key = KEY_LEFT;
-                } else if (x <= 73) {
-                    printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "down");
-                    pressed_key = KEY_DOWN;
-                } else {
-                    printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "right");
-                    pressed_key = KEY_RIGHT;
-                }
-            }
-        } else if (x <= 83) {
-            printk(KERN_INFO "%s: pressed %s\n", DRIVER_NAME, "right control");
-            pressed_key = KEY_RIGHTCTRL;
-        }
+    y = y >= 50 ? 49 : y;
+    pressed_key = keys[(y / 10) % 5][x / 6];
+    if (pressed_key == 0) {
+        pressed_key = extra_keys[((y - 40) / 6) % 2][((x - 66) / 4) % 3];
     }
+    printk(KERN_INFO "%s: pressed %x\n", DRIVER_NAME, pressed_key);
 }
 
 static void down_keyboard(u16 x, u16 y) {
@@ -475,6 +282,8 @@ static struct usb_driver tablet_driver = {
 
 static int __init keyboard_tablet_init(void) {
     int result = usb_register(&tablet_driver);
+    int i;
+    int j;
 
     if (result < 0) {
         printk(KERN_ERR "%s: usb register error\n", DRIVER_NAME);
@@ -496,71 +305,20 @@ static int __init keyboard_tablet_init(void) {
     keyboard->name = "virtual keyboard";
 
     set_bit(EV_KEY, keyboard->evbit);
-    set_bit(KEY_ESC, keyboard->keybit);
-    set_bit(KEY_1, keyboard->keybit);
-    set_bit(KEY_2, keyboard->keybit);
-    set_bit(KEY_3, keyboard->keybit);
-    set_bit(KEY_4, keyboard->keybit);
-    set_bit(KEY_5, keyboard->keybit);
-    set_bit(KEY_6, keyboard->keybit);
-    set_bit(KEY_7, keyboard->keybit);
-    set_bit(KEY_8, keyboard->keybit);
-    set_bit(KEY_9, keyboard->keybit);
-    set_bit(KEY_0, keyboard->keybit);
-    set_bit(KEY_MINUS, keyboard->keybit);
-    set_bit(KEY_EQUAL, keyboard->keybit);
-    set_bit(KEY_BACKSPACE, keyboard->keybit);
-    set_bit(KEY_TAB, keyboard->keybit);
-    set_bit(KEY_Q, keyboard->keybit);
-    set_bit(KEY_W, keyboard->keybit);
-    set_bit(KEY_E, keyboard->keybit);
-    set_bit(KEY_R, keyboard->keybit);
-    set_bit(KEY_T, keyboard->keybit);
-    set_bit(KEY_Y, keyboard->keybit);
-    set_bit(KEY_U, keyboard->keybit);
-    set_bit(KEY_I, keyboard->keybit);
-    set_bit(KEY_O, keyboard->keybit);
-    set_bit(KEY_P, keyboard->keybit);
-    set_bit(KEY_LEFTBRACE, keyboard->keybit);
-    set_bit(KEY_RIGHTBRACE, keyboard->keybit);
-    set_bit(KEY_BACKSLASH, keyboard->keybit);
-    set_bit(KEY_CAPSLOCK, keyboard->keybit);
-    set_bit(KEY_A, keyboard->keybit);
-    set_bit(KEY_S, keyboard->keybit);
-    set_bit(KEY_D, keyboard->keybit);
-    set_bit(KEY_F, keyboard->keybit);
-    set_bit(KEY_G, keyboard->keybit);
-    set_bit(KEY_H, keyboard->keybit);
-    set_bit(KEY_J, keyboard->keybit);
-    set_bit(KEY_K, keyboard->keybit);
-    set_bit(KEY_L, keyboard->keybit);
-    set_bit(KEY_SEMICOLON, keyboard->keybit);
-    set_bit(KEY_APOSTROPHE, keyboard->keybit);
-    set_bit(KEY_ENTER, keyboard->keybit);
-    set_bit(KEY_LEFTSHIFT, keyboard->keybit);
-    set_bit(KEY_Z, keyboard->keybit);
-    set_bit(KEY_X, keyboard->keybit);
-    set_bit(KEY_C, keyboard->keybit);
-    set_bit(KEY_V, keyboard->keybit);
-    set_bit(KEY_B, keyboard->keybit);
-    set_bit(KEY_N, keyboard->keybit);
-    set_bit(KEY_M, keyboard->keybit);
-    set_bit(KEY_COMMA, keyboard->keybit);
-    set_bit(KEY_DOT, keyboard->keybit);
-    set_bit(KEY_SLASH, keyboard->keybit);
-    set_bit(KEY_RIGHTSHIFT, keyboard->keybit);
-    set_bit(KEY_LEFTCTRL, keyboard->keybit);
-    set_bit(KEY_LEFTMETA, keyboard->keybit);
-    set_bit(KEY_LEFTALT, keyboard->keybit);
-    set_bit(KEY_SPACE, keyboard->keybit);
-    set_bit(KEY_RIGHTALT, keyboard->keybit);
-    set_bit(KEY_DELETE, keyboard->keybit);
-    set_bit(KEY_UP, keyboard->keybit);
-    set_bit(KEY_GRAVE, keyboard->keybit);
-    set_bit(KEY_LEFT, keyboard->keybit);
-    set_bit(KEY_DOWN, keyboard->keybit);
-    set_bit(KEY_RIGHT, keyboard->keybit);
-    set_bit(KEY_RIGHTCTRL, keyboard->keybit);
+
+    for (i = 0; i < 5; ++i) {
+        for (j = 0; j < 14; ++j) {
+            if (keys[i][j] != 0) {
+                set_bit(keys[i][j], keyboard->keybit);
+            }
+        }
+    }
+
+    for (i = 0; i < 2; ++i) {
+        for (j = 0; j < 3; ++j) {
+            set_bit(extra_keys[i][j], keyboard->keybit);
+        }
+    }
 
     result = input_register_device(keyboard);
     if (result != 0) {
