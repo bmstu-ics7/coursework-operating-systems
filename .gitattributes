@@ -1,0 +1,6 @@
+*.gitattributes text
+.gitignore      text
+*.tex           text
+.gitattributes  export-ignore
+.gitignore      export-ignore
+*.gitattributes linguist-language=gitattributes
